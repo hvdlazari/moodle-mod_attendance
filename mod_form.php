@@ -79,13 +79,13 @@ class mod_attendance_mod_form extends moodleform_mod {
     function data_preprocessing(&$default_values) {
         parent::data_preprocessing($default_values);
 
-        if (empty($this->_instance) || !empty($default_values['completionwatched'])) {
-            $default_values['completionwatchedenabled'] = 1;
+        if (empty($this->_instance) || !empty($default_values['completionattendance'])) {
+            $default_values['completionattendanceenabled'] = 1;
         } else {
-            $default_values['completionwatchedenabled'] = 0;
+            $default_values['completionattendanceenabled'] = 0;
         }
-        if (empty($default_values['completionwatched'])) {
-            $default_values['completionwatched'] = 1;
+        if (empty($default_values['completionattendance'])) {
+            $default_values['completionattendance'] = 1;
         }
     }
 
@@ -93,17 +93,17 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform = &$this->_form;
 
         $group = array();
-        $group[] = &$mform->createElement('checkbox', 'completionwatchedenabled', '', get_string('completionwatched', 'attendance'));
-        $group[] = &$mform->createElement('text', 'completionwatched', '', array('size' => 3));
-        $mform->setType('completionwatched', PARAM_INT);
-        $mform->addGroup($group, 'completionwatchedgroup', get_string('completionwatchedgroup', 'attendance'), array(' '), false);
-        $mform->disabledIf('completionwatched', 'completionwatchedenabled', 'notchecked');
+        $group[] = &$mform->createElement('checkbox', 'completionattendanceenabled', '', get_string('completionattendance', 'attendance'));
+        $group[] = &$mform->createElement('text', 'completionattendance', '', array('size' => 3));
+        $mform->setType('completionattendance', PARAM_INT);
+        $mform->addGroup($group, 'completionattendancegroup', get_string('completionattendancegroup', 'attendance'), array(' '), false);
+        $mform->disabledIf('completionattendance', 'completionattendanceenabled', 'notchecked');
 
-        return array('completionwatchedgroup');
+        return array('completionattendancegroup');
     }
 
     function completion_rule_enabled($data) {
-        return (!empty($data['completionwatchedenabled']) && $data['completionwatched'] != 0);
+        return (!empty($data['completionattendanceenabled']) && $data['completionattendance'] != 0);
     }
 
     /**
@@ -119,8 +119,8 @@ class mod_attendance_mod_form extends moodleform_mod {
         // Turn off completion settings if the checkboxes aren't ticked
         if (!empty($data->completionunlocked)) {
             $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
-            if (empty($data->completionwatchedenabled) || !$autocompletion) {
-                $data->completionwatched = 0;
+            if (empty($data->completionattendanceenabled) || !$autocompletion) {
+                $data->completionattendance = 0;
             }
         }
     }
