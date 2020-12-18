@@ -640,5 +640,31 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2020072900, 'attendance');
     }
 
+    if ($oldversion < 2020121100) {
+        // Define field deleted to be added to forum_posts.
+        $table = new xmldb_table('attendance');
+
+        $field1 = new xmldb_field('duration', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'showextrauserdetails');
+        // Conditionally launch add field deleted.
+        if (!$dbman->field_exists($table, $field1)) {
+            $dbman->add_field($table, $field1);
+        }
+
+        $field2 = new xmldb_field('completionattendance', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'duration');
+        // Conditionally launch add field deleted.
+        if (!$dbman->field_exists($table, $field2)) {
+            $dbman->add_field($table, $field2);
+        }
+
+        $table2 = new xmldb_table('attendance_log');
+        $field21 = new xmldb_field('absent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'takenby');
+        // Conditionally launch add field deleted.
+        if (!$dbman->field_exists($table2, $field21)) {
+            $dbman->add_field($table2, $field21);
+        }
+
+        upgrade_mod_savepoint(true, 2020121100, 'attendance');
+    }
+
     return $result;
 }

@@ -630,3 +630,8 @@ $string['week'] = 'week(s)';
 $string['weekcommencing'] = 'Week commencing';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+
+$string['completionattendancegroup'] = 'Requires Participation';
+$string['completionattendance'] = 'Student must participe activity percentage';
+$string['absent'] = 'Absent';
+$string['minutes'] = '{$a} minutes';

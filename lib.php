@@ -49,6 +49,8 @@ function attendance_supports($feature) {
         // Artem Andreev: AFAIK it's not tested.
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return false;
+        case FEATURE_COMPLETION_HAS_RULES:
+            return true;
         default:
             return null;
     }
@@ -535,4 +537,51 @@ function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
     foreach ($updatedwarnings as $updatedwarning) {
         $DB->update_record('attendance_warning', $updatedwarning);
     }
+}
+
+function attendance_get_completion_state($course, $cm, $userid, $type) {
+    global $CFG, $DB;
+
+    // Get attendance details
+    if (!($attendance = $DB->get_record('attendance', array('id' => $cm->instance)))) {
+        throw new Exception("Can't find attendance {$cm->instance}");
+    }
+
+    $result = $type; // Default return value
+
+    $getAttendance = attendance_get_users_completion($attendance->course, $attendance->id, $userid);
+    $percent = intval(round(($getAttendance->duration - $getAttendance->absent) * 100 / $getAttendance->duration));
+
+    if ($attendance->completionattendance) {
+        $result = $percent >= $attendance->completionattendance;
+    }
+
+    return $result;
+}
+
+function attendance_get_users_completion($courseid, $instanceid, $userid) {
+    global $DB;
+
+    return $DB->get_records_sql("select l.studentid, sum(l.absent) as absent, sum(s.duration) as duration
+                                        from {course_modules} cm                                        
+                                        inner join {modules} m
+                                        on m.id = cm.module
+                                        and m.name='attendance'                                        
+                                        inner join {attendance} a
+                                        on cm.instance=a.id                                        
+                                        inner join {attendance_sessions} s
+                                        on a.id=s.attendanceid                                        
+                                        left join {attendance_log} l
+                                        on s.id = l.sessionid                                        
+                                        left join {course_modules_completion} cmc
+                                        on cmc.coursemoduleid=cm.id
+                                        and cmc.userid = l.studentid                                        
+                                        WHERE cm.course = :courseid
+                                          AND cm.visible = 1
+                                          AND cm.instance = :intanceid
+                                          AND cm.deletioninprogress = 0
+                                          AND l.studentid = :userid                                       
+                                          AND cmc.id IS NULL
+                                        GROUP BY a.id , l.studentid",
+        ['courseid' => $courseid, 'intanceid' => $instanceid, 'userid' => $userid]);
 }

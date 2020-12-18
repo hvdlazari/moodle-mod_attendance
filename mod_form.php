@@ -53,6 +53,8 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->setDefault('name', get_string('modulename', 'attendance'));
 
         $this->standard_intro_elements();
+        
+        $mform->addElement('duration', 'duration', get_string('duration', 'attendance'));
 
         // Grade settings.
         $this->standard_grading_coursemodule_elements();
@@ -72,5 +74,54 @@ class mod_attendance_mod_form extends moodleform_mod {
         }
 
         $this->add_action_buttons();
+    }
+
+    function data_preprocessing(&$default_values) {
+        parent::data_preprocessing($default_values);
+
+        if (empty($this->_instance) || !empty($default_values['completionwatched'])) {
+            $default_values['completionwatchedenabled'] = 1;
+        } else {
+            $default_values['completionwatchedenabled'] = 0;
+        }
+        if (empty($default_values['completionwatched'])) {
+            $default_values['completionwatched'] = 1;
+        }
+    }
+
+    public function add_completion_rules() {
+        $mform = &$this->_form;
+
+        $group = array();
+        $group[] = &$mform->createElement('checkbox', 'completionwatchedenabled', '', get_string('completionwatched', 'attendance'));
+        $group[] = &$mform->createElement('text', 'completionwatched', '', array('size' => 3));
+        $mform->setType('completionwatched', PARAM_INT);
+        $mform->addGroup($group, 'completionwatchedgroup', get_string('completionwatchedgroup', 'attendance'), array(' '), false);
+        $mform->disabledIf('completionwatched', 'completionwatchedenabled', 'notchecked');
+
+        return array('completionwatchedgroup');
+    }
+
+    function completion_rule_enabled($data) {
+        return (!empty($data['completionwatchedenabled']) && $data['completionwatched'] != 0);
+    }
+
+    /**
+     * Allows module to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @param stdClass $data the form data to be modified.
+     */
+    public function data_postprocessing($data) {
+        parent::data_postprocessing($data);
+        // Turn off completion settings if the checkboxes aren't ticked
+        if (!empty($data->completionunlocked)) {
+            $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
+            if (empty($data->completionwatchedenabled) || !$autocompletion) {
+                $data->completionwatched = 0;
+            }
+        }
     }
 }

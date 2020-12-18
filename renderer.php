@@ -757,6 +757,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         }
 
+        $table->head[] = get_string('absent', 'attendance');
         $table->head[] = get_string('remarks', 'attendance');
         $table->align[] = 'center';
         $table->size[] = '20px';
@@ -796,6 +797,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     });
                 });");
         }
+        $row->cells[] = '';
         $row->cells[] = '';
         $table->data[] = $row;
 
@@ -981,10 +983,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
                 $celldata['text'][] = $input;
             }
+
+            $options = [];
+            for($i=0; $i<=120; $i += 5) {
+                $options[$i] = get_string('minutes','attendance', $i);
+            }
+            $selected = null;
+            if (array_key_exists($user->id, $takedata->sessionlog)) {
+                $selected = (int)$takedata->sessionlog[$user->id]->absent/60;
+            }
+            $celldata['text'][] = html_writer::select($options, 'absent'.$user->id, $selected);
+
             $params = array(
-                    'type'  => 'text',
-                    'name'  => 'remarks'.$user->id,
-                    'maxlength' => 255);
+                'type'  => 'text',
+                'name'  => 'remarks'.$user->id,
+                'maxlength' => 255);
             if (array_key_exists($user->id, $takedata->sessionlog)) {
                 $params['value'] = $takedata->sessionlog[$user->id]->remarks;
             }
