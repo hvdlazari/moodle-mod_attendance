@@ -15,17 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Strings for component 'attendance', language 'pt_br'
  *
- * @package    mod_attendance
+ * @package   mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2020121100;
-$plugin->requires = 2019072500; // Requires 3.8.
-$plugin->release = '3.9.1';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_attendance';
+$string['completionattendancegroup'] = 'Requer Participação';
+$string['completionattendance'] = 'O estudante deve participar a porcentagem da atividade';
+$string['absent'] = 'Ausente';
+$string['minutes'] = '{$a} minutos';

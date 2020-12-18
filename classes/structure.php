@@ -91,7 +91,13 @@ class mod_attendance_structure {
     public $sessiondetailspos;
 
     /** @var int groupmode  */
-    private $groupmode;
+    public $groupmode;
+
+    /** @var int duration  */
+    public $duration;
+
+    /** @var int completionattendance  */
+    private $completionattendance;
 
     /** @var  array */
     private $statuses;
@@ -657,6 +663,7 @@ class mod_attendance_structure {
         $record->sessionid = $mformdata->sessid;
         $record->timetaken = $now;
         $record->takenby = $USER->id;
+        $record->absent = $mformdata->absent;
         $record->ipaddress = getremoteaddr(null);
 
         $existingattendance = $DB->record_exists('attendance_log',
@@ -732,6 +739,7 @@ class mod_attendance_structure {
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;
+                $sesslog[$sid]->absent = (int)$formdata['absent' . $sid]*60;
             }
         }
 
@@ -757,7 +765,8 @@ class mod_attendance_structure {
                     // Don't update timetaken/takenby records if nothing has changed.
                     if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
                         $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
-                        $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
+                        $dbsesslog[$log->studentid]->statusset <> $log->statusset ||
+                        $dbsesslog[$log->studentid]->absent <> $log->absent) {
 
                         $log->id = $dbsesslog[$log->studentid]->id;
                         $DB->update_record('attendance_log', $log);
@@ -1054,7 +1063,7 @@ class mod_attendance_structure {
     public function get_session_log($sessionid) : array {
         global $DB;
 
-        return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id,statusset');
+        return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,absent,remarks,id,statusset');
     }
 
     /**
